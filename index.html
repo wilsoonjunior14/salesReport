@@ -1,0 +1,251 @@
+<html>
+	
+	<head>
+		<title>test</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="chart.min.js"></script>
+	</head>
+
+	<body>
+
+		<style>
+			.toolbar{
+				position: absolute;
+				top: 0;
+				left: 0;
+				background: lightblue;
+				color: white;
+				width: 100%;
+				height: 60px;
+			}
+
+			.toolbar-left{
+				float: left;
+				list-style: none;
+			}
+
+			.toolbar-right{
+				float: right;
+				list-style: none;
+			}
+
+			.options{
+				list-style: none;
+				float: left;
+			}
+
+			.options li{
+				min-width: 150px;
+				float: left;
+			}
+
+			main{
+				margin-top: 60px;
+			}
+
+			#canvas{
+				width: 100%;
+				margin: 20px;
+				height: 500px;
+			}
+
+
+		</style>
+
+		<nav class="toolbar">
+
+			<ul class="toolbar-left">
+				<li>MENU</li>
+				<li>
+					Username
+				</li>
+			</ul>
+
+			<ul class="toolbar-right">
+				<li>Sales Report</li>
+			</ul>
+
+		</nav>
+
+		<main>
+			<ul class="options">
+				<li>
+					<div>
+						<label for="categoria">Categoria:</label>
+						<select id="categoria">
+							<option>A</option>
+							<option>B</option>
+						</select>
+					</div>
+				</li>
+				<li>
+					<div>
+						<label for="produto">Produto:</label>
+						<select id="produto">
+						</select>
+					</div>
+				</li>
+				<li>
+					<div>
+						<label for="marca">Marca:</label>
+						<select id="marca">
+						</select>
+					</div>
+				</li>
+			</ul>
+
+			<canvas id="canvas"></canvas>
+
+
+		</main>
+
+		<script>
+
+			window.onload = function(){
+
+				var data = {
+					categorias:[
+					{name: 'A',
+					produtos: [{name: 'A1', marcas: [{name: 'MA11', values: [10, 50, 30, 15]}, {name: 'MA12', values: [10, 20, 45, 15]}]}, {name: 'A2', marcas: [{name: 'MA21', values: [2, 100, 240, 15]}, {name: 'MA22', values: [5, 6, 20, 15]}]}, {name: 'A3', marcas: [{name:'MA31', values: [5, 24, 45, 65]}, {name: 'MA32', values: [10, 50, 30, 15]}]}]},
+					{name: 'B',
+					produtos: [{name: 'B1', marcas: [{name: 'MB11', values: [30, 50, 20, 15]}, {name: 'MB12', values: [10, 50, 30, 15]}]}, {name: 'B2', marcas: [{name: 'MB21', values: [10, 50, 30, 15]}, {name: 'MB22', values: [10, 100, 30, 15]}]}, {name: 'B3', marcas: [{name: 'MB31', values: [10, 500, 30, 100]}, {name: 'MB32'}]}]}]
+				};
+
+				var MONTHS = ['January', 'February', 'March', 'April'];
+
+
+				function selecionarCategoria(item){
+					$('#categoria').empty();
+					$('#produto').empty();
+					$('#marca').empty();
+
+					for (var i=0; i<data.categorias.length; i++){
+
+						var name = data.categorias[i].name;
+						var produtos = data.categorias[i].produtos;
+
+						if (item == name){
+							$('#categoria').append("<option selected value='"+data.categorias[i].name+"'>"+data.categorias[i].name+"</option>");
+
+							for (var j=0; j<produtos.length; j++){
+								$('#produto').append("<option value="+produtos[j].name+">"+produtos[j].name+"</option>");
+
+								if (j == 0){
+									produtos[j].marcas.forEach((marca) => {
+										$('#marca').append("<option value="+marca.name+">"+marca.name+"</option>");
+									});
+								}
+							}
+
+						}else{
+							$('#categoria').append("<option value="+data.categorias[i].name+">"+data.categorias[i].name+"</option>");
+						}
+						
+					}
+				}
+
+				function selecionarProduto(item){
+					$('#marca').empty();
+					var categoria = $('#categoria').val();
+
+					for (var i=0; i<data.categorias.length; i++){
+						var name = data.categorias[i].name;
+						if (categoria == name){
+
+							var produtos = data.categorias[i].produtos;
+							produtos.forEach((produto) => {
+								if (produto.name == item){
+									produto.marcas.forEach((marca) => {
+										$('#marca').append("<option value="+marca.name+">"+marca.name+"</option>");
+									});
+								}
+								
+							});
+
+						}
+					}
+				}
+
+				function selecionarMarca(item){
+					var categoria     = $('#categoria').val();
+					var nomeProduto   = $('#produto').val();
+
+					for (var i=0; i<data.categorias.length; i++){
+						var name = data.categorias[i].name;
+						if (categoria == name){
+
+							var produtos = data.categorias[i].produtos;
+
+							produtos.forEach((produto) => {
+								if (produto.name == nomeProduto){
+									produto.marcas.forEach((marca) => {
+										if (marca.name == item) desenhaGrafico(marca.values);
+									});
+								}
+							});
+
+						}
+					}
+				}
+
+				function desenhaGrafico(values){
+					$('#canvas').remove();
+					$('main').append("<canvas id='canvas'></canvas>");
+					console.log(values);
+
+
+					var barChartData = {
+					labels: MONTHS,
+					datasets: [{
+						label: 'Vendas',
+						backgroundColor: "lightblue",
+						borderColor: "lightblue",
+						borderWidth: 1,
+						data: values
+					}]
+					};
+
+					var ctx = document.getElementById('canvas').getContext('2d');
+					window.myBar = new Chart(ctx, {
+						type: 'bar',
+						data: barChartData,
+						options: {
+							responsive: true,
+							legend: {
+								position: 'bottom',
+							},
+							title: {
+								display: true,
+								text: 'Sales By Month'
+							}
+						}
+					});
+
+
+
+				}
+
+				selecionarCategoria('A');
+
+				$('#categoria').change(function(){
+					selecionarCategoria($('#categoria').val());
+				});
+
+				$('#produto').change(function(){
+					selecionarProduto($('#produto').val());
+				});
+
+				$('#marca').change(function(){
+					selecionarMarca($('#marca').val());
+				});
+
+				desenhaGrafico();
+
+
+			};
+
+		</script>
+
+	</body>
+
+</html>
