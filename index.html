@@ -19,24 +19,45 @@
 				height: 60px;
 			}
 
-			.toolbar-left{
+			.toolbar ul li{
 				float: left;
+			}
+
+			.toolbar-left{
 				list-style: none;
 			}
 
 			.toolbar-right{
 				float: right;
 				list-style: none;
+				margin-top: 0px;
+				padding-right: 20px;
+			}
+
+			.toolbar-username{
+				margin-left: 50px;
+			}
+
+			.toolbar-username-id{
+				width: 15px;
+				height: 15px;
+				border: 1px solid red;
+				background: red;
+				border-radius: 50%;
+				margin-right: 5px;
+				float: left;
 			}
 
 			.options{
 				list-style: none;
 				float: left;
+				width: 95vw;
 			}
 
 			.options li{
-				min-width: 150px;
+				min-width: 33%;
 				float: left;
+				margin: 0 auto;
 			}
 
 			main{
@@ -44,9 +65,9 @@
 			}
 
 			#canvas{
-				width: 100%;
-				margin: 20px;
-				height: 500px;
+				margin: 0 auto;
+				max-width: 90vw !important;
+				max-height: 80vh !important;
 			}
 
 
@@ -56,8 +77,8 @@
 
 			<ul class="toolbar-left">
 				<li>MENU</li>
-				<li>
-					Username
+				<li class="toolbar-username">
+					<div class="toolbar-username-id"></div>Username
 				</li>
 			</ul>
 
@@ -73,8 +94,6 @@
 					<div>
 						<label for="categoria">Categoria:</label>
 						<select id="categoria">
-							<option>A</option>
-							<option>B</option>
 						</select>
 					</div>
 				</li>
@@ -108,11 +127,10 @@
 					{name: 'A',
 					produtos: [{name: 'A1', marcas: [{name: 'MA11', values: [10, 50, 30, 15]}, {name: 'MA12', values: [10, 20, 45, 15]}]}, {name: 'A2', marcas: [{name: 'MA21', values: [2, 100, 240, 15]}, {name: 'MA22', values: [5, 6, 20, 15]}]}, {name: 'A3', marcas: [{name:'MA31', values: [5, 24, 45, 65]}, {name: 'MA32', values: [10, 50, 30, 15]}]}]},
 					{name: 'B',
-					produtos: [{name: 'B1', marcas: [{name: 'MB11', values: [30, 50, 20, 15]}, {name: 'MB12', values: [10, 50, 30, 15]}]}, {name: 'B2', marcas: [{name: 'MB21', values: [10, 50, 30, 15]}, {name: 'MB22', values: [10, 100, 30, 15]}]}, {name: 'B3', marcas: [{name: 'MB31', values: [10, 500, 30, 100]}, {name: 'MB32'}]}]}]
+					produtos: [{name: 'B1', marcas: [{name: 'MB11', values: [30, 50, 20, 15]}, {name: 'MB12', values: [10, 50, 30, 15]}]}, {name: 'B2', marcas: [{name: 'MB21', values: [10, 50, 30, 15]}, {name: 'MB22', values: [10, 100, 30, 15]}]}, {name: 'B3', marcas: [{name: 'MB31', values: [10, 500, 30, 100]}, {name: 'MB32', values: [10, 600, 20, 100]}]}]}]
 				};
 
 				var MONTHS = ['January', 'February', 'March', 'April'];
-
 
 				function selecionarCategoria(item){
 					$('#categoria').empty();
@@ -131,9 +149,7 @@
 								$('#produto').append("<option value="+produtos[j].name+">"+produtos[j].name+"</option>");
 
 								if (j == 0){
-									produtos[j].marcas.forEach((marca) => {
-										$('#marca').append("<option value="+marca.name+">"+marca.name+"</option>");
-									});
+									preencheMarcas(produtos[j]);
 								}
 							}
 
@@ -142,6 +158,14 @@
 						}
 						
 					}
+				}
+
+				function preencheMarcas(produto){
+					produto.marcas.forEach((marca) => {
+						$('#marca').append("<option value="+marca.name+">"+marca.name+"</option>");
+					});
+
+					if (produto.marcas.length > 0) desenhaGrafico(produto.marcas[0].values);
 				}
 
 				function selecionarProduto(item){
@@ -155,9 +179,7 @@
 							var produtos = data.categorias[i].produtos;
 							produtos.forEach((produto) => {
 								if (produto.name == item){
-									produto.marcas.forEach((marca) => {
-										$('#marca').append("<option value="+marca.name+">"+marca.name+"</option>");
-									});
+									preencheMarcas(produto);
 								}
 								
 							});
@@ -191,8 +213,6 @@
 				function desenhaGrafico(values){
 					$('#canvas').remove();
 					$('main').append("<canvas id='canvas'></canvas>");
-					console.log(values);
-
 
 					var barChartData = {
 					labels: MONTHS,
@@ -225,7 +245,7 @@
 
 				}
 
-				selecionarCategoria('A');
+				selecionarCategoria(data.categorias[0].name);
 
 				$('#categoria').change(function(){
 					selecionarCategoria($('#categoria').val());
@@ -238,8 +258,6 @@
 				$('#marca').change(function(){
 					selecionarMarca($('#marca').val());
 				});
-
-				desenhaGrafico();
 
 
 			};
